@@ -15,6 +15,37 @@
 # *  limitations under the License.
 # *--------------------------------------------------------------------------*/
 
+addResidual () {
+    residual_args+=( "$1" )
+}
+
+addJava () {
+    java_args+=( "$1" )
+}
+
+process_args () {
+    local no_more_snp_opts=0
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -D*) addJava "$1" && shift ;;
+            -J*) addJava "${1:2}" && shift ;;
+            *) addResidual "$1" && shift ;;
+    esac
+done
+
+if [[ no_more_snp_opts ]]; then
+    while [[ $# -gt 0 ]]; do
+        addResidual "$1" && shift
+    done
+fi
+}
+
+process_args "$@"
+
+JVM_OPT="${java_args} ${JVM_OPT}"
+
+set -- "${residual_args[@]}"
+
 if [ -z "$PROG_HOME" ] ; then
   ## resolve links - $0 may be a link to PROG_HOME
   PRG="$0"
